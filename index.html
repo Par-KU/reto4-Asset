@@ -217,7 +217,10 @@ scene.add(bracelet);
 const R = 1.48;
 
 // Correa continua de caucho
-const strap = new THREE.Mesh(new THREE.TorusGeometry(R,.205,18,112),rubberMat);
+const strap = new THREE.Mesh(
+  new THREE.TorusGeometry(R, .11, 18, 112),
+  rubberMat
+);
 bracelet.add(strap);
 
 // Placas exteriores
@@ -243,12 +246,16 @@ for(let i=0;i<plateCount;i++){
   p.add(inset);
 
   if(i%3===0){
-    const line = new THREE.Mesh(new THREE.BoxGeometry(.18,.025,.025),glowMat);
+    const line = new THREE.Mesh(
+      new THREE.BoxGeometry(.18,.025,.025),
+      glowMat
+    );
     line.position.set(0,0,.09);
     p.add(line);
   }
 
   const screwGeo = new THREE.CylinderGeometry(.026,.026,.025,12);
+
   for(const sy of [-.105,.105]){
     const s = new THREE.Mesh(screwGeo,darkMetal);
     s.position.set(-.145,sy,.075);
@@ -258,7 +265,7 @@ for(let i=0;i<plateCount;i++){
 
   bracelet.add(p);
 }
-
+ 
 // Módulo frontal
 const module = new THREE.Group();
 module.position.set(0,0,R+.17);
