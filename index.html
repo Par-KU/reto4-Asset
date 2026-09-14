@@ -1115,7 +1115,7 @@ scene.add(
    RADIO GENERAL
    ========================================================= */
 
-const R = 1.20;
+const R = 1.48;
 
 
 /* =========================================================
@@ -1130,7 +1130,7 @@ const R = 1.20;
    hacemos la correa más delgada.
    ========================================================= */
 
-/*const strap =
+const strap =
   new THREE.Mesh(
     new THREE.TorusGeometry(
       R,
@@ -1668,7 +1668,7 @@ let phi =
   1.25;
 
 let distance =
-  9.5;
+  7.4;
 
 let dragging =
   false;
@@ -1689,6 +1689,52 @@ let active =
 
 let activeTime =
   0;
+
+/* =========================================================
+   AUDIO — RESONANCIA
+   ========================================================= */
+
+const resonanceSfx =
+  new Audio("assets/mixkit-interface-hint-notification-911.wav");
+
+resonanceSfx.preload = "auto";
+resonanceSfx.volume = 0.40;
+
+let resonanceSoundTimers = [];
+
+function clearResonanceSoundTimers(){
+
+  resonanceSoundTimers.forEach(
+    timer => clearTimeout(timer)
+  );
+
+  resonanceSoundTimers = [];
+
+}
+
+function playResonanceSound(){
+
+  clearResonanceSoundTimers();
+
+  /* 3 pulsos: inicio + dos repeticiones durante el escaneo. */
+  const repetitions = 3;
+  const interval = 1750;
+
+  for(let i = 0; i < repetitions; i++){
+
+    const timer = setTimeout(() => {
+
+      resonanceSfx.currentTime = 0;
+
+      resonanceSfx.play().catch(() => {});
+
+    }, i * interval);
+
+    resonanceSoundTimers.push(timer);
+
+  }
+
+}
 
 
 /* =========================================================
@@ -1803,9 +1849,9 @@ renderer.domElement.addEventListener(
 
     distance =
       Math.max(
-        5.5,
+        4.0,
         Math.min(
-          20,
+          14,
           distance +
           e.deltaY *
           .002
@@ -1830,11 +1876,18 @@ renderer.domElement.addEventListener(
 
 function activate(){
 
+  /* Mientras está escaneando, otro clic no reinicia la secuencia. */
+  if(active){
+    return;
+  }
+
   active =
     true;
 
   activeTime =
     0;
+
+  playResonanceSound();
 
 
   document
@@ -2169,11 +2222,16 @@ function animate(){
 
     if(
       activeTime >
-      4
+      5.6
     ){
 
       active =
         false;
+
+      clearResonanceSoundTimers();
+
+      resonanceSfx.pause();
+      resonanceSfx.currentTime = 0;
 
 
       activationRing
@@ -2265,4 +2323,3 @@ addEventListener(
 
 </body>
 </html>
-
