@@ -21,22 +21,35 @@ html,body{
 }
 
 body{
-  background:
-    radial-gradient(
-      circle at 58% 38%,
-      rgba(17,74,96,.22),
-      transparent 32%
-    ),
-    radial-gradient(
-      circle at 50% 100%,
-      rgba(0,150,210,.08),
-      transparent 40%
-    ),
-    #05080c
+  background:#05080c
+}
+
+.cityBackground{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background-image:url("assets/fondo.png");
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+  opacity:.75;
+}
+
+.cityBackground::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(2,7,11,.68);
 }
 
 canvas{
-  display:block
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  z-index:1
 }
 
 /* =========================================================
@@ -523,43 +536,35 @@ canvas{
    AUDIO — CONTROL DE VOLUMEN
    ========================================================= */
 .audioControl{
-  position:fixed;
-  left:24px;
-  bottom:24px;
-  z-index:30;
   display:flex;
   align-items:center;
   gap:10px;
-  padding:9px 12px;
-  border:1px solid rgba(110,220,255,.25);
-  background:rgba(5,12,20,.82);
-  backdrop-filter:blur(8px);
+  margin-top:18px;
+  padding-top:12px;
+  border-top:1px solid rgba(100,180,205,.17);
   color:#bfefff;
   font:11px/1.2 Arial,sans-serif;
   letter-spacing:1px;
   text-transform:uppercase;
 }
 .audioControl input[type=range]{
-  width:105px;
+  flex:1;
+  min-width:80px;
   accent-color:#65ddff;
   cursor:pointer;
 }
 .audioValue{
-  min-width:32px;
+  min-width:34px;
   text-align:right;
   color:#fff;
-}
-@media(max-width:700px){
-  .audioControl{
-    left:10px;
-    bottom:10px;
-  }
 }
 
 </style>
 </head>
 
 <body>
+
+<div class="cityBackground" aria-hidden="true"></div>
 
 <div class="hud">
 
@@ -705,19 +710,6 @@ canvas{
 
 
 
-  <div class="audioControl" aria-label="Control de volumen">
-    <span>🔊 VOLUMEN</span>
-    <input
-      id="volumeControl"
-      type="range"
-      min="0"
-      max="1"
-      step="0.01"
-      value="0.40"
-      aria-label="Volumen"
-    >
-    <span id="volumeValue" class="audioValue">40%</span>
-  </div>
 
   <div
     id="status"
@@ -918,6 +910,20 @@ canvas{
 
         </div>
 
+        <div class="audioControl" aria-label="Control de volumen de música">
+          <span>🔊 VOLUMEN</span>
+          <input
+            id="volumeControl"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.40"
+            aria-label="Volumen de música"
+          >
+          <span id="volumeValue" class="audioValue">40%</span>
+        </div>
+
       </div>
 
     </div>
@@ -946,7 +952,7 @@ canvas{
 const scene = new THREE.Scene();
 
 scene.background =
-  new THREE.Color(0x05080c);
+  null;
 
 scene.fog =
   new THREE.FogExp2(
@@ -981,7 +987,7 @@ camera.position.set(
 const renderer =
   new THREE.WebGLRenderer({
     antialias:true,
-    alpha:false
+    alpha:true
   });
 
 renderer.setSize(
@@ -1790,7 +1796,6 @@ volumeControl.addEventListener("input", () => {
     Number(volumeControl.value);
 
   backgroundMusic.volume = volume;
-  resonanceSfx.volume = volume;
 
   volumeValue.textContent =
     Math.round(volume * 100) + "%";
