@@ -539,13 +539,17 @@ canvas{
   display:flex;
   align-items:center;
   gap:10px;
-  margin-top:18px;
-  padding-top:12px;
+  margin-top:12px;
+  padding-top:10px;
   border-top:1px solid rgba(100,180,205,.17);
   color:#bfefff;
   font:11px/1.2 Arial,sans-serif;
   letter-spacing:1px;
   text-transform:uppercase;
+}
+.audioControl:first-of-type{
+  margin-top:18px;
+  padding-top:12px;
 }
 .audioControl input[type=range]{
   flex:1;
@@ -910,18 +914,36 @@ canvas{
 
         </div>
 
-        <div class="audioControl" aria-label="Control de volumen de música">
-          <span>🔊 VOLUMEN</span>
-          <input
-            id="volumeControl"
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value="0.40"
-            aria-label="Volumen de música"
-          >
-          <span id="volumeValue" class="audioValue">40%</span>
+        <div>
+
+          <div class="audioControl" aria-label="Control de volumen de música">
+            <span>🔊 MÚSICA</span>
+            <input
+              id="volumeControl"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.40"
+              aria-label="Volumen de música"
+            >
+            <span id="volumeValue" class="audioValue">40%</span>
+          </div>
+
+          <div class="audioControl" aria-label="Control de volumen de resonancia">
+            <span>🔔 RESONANCIA</span>
+            <input
+              id="resonanceVolumeControl"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.40"
+              aria-label="Volumen de resonancia"
+            >
+            <span id="resonanceVolumeValue" class="audioValue">40%</span>
+          </div>
+
         </div>
 
       </div>
@@ -1177,34 +1199,6 @@ scene.add(
    ========================================================= */
 
 const R = 1.48;
-
-
-/* =========================================================
-   CORREA CONTINUA DE CAUCHO
-   =========================================================
-   
-   IMPORTANTE:
-   .11 = grosor de la correa
-   R   = radio de la pulsera
-   
-   Se mantiene el mismo radio y solamente
-   hacemos la correa más delgada.
-   ========================================================= */
-
-/*const strap =
-  new THREE.Mesh(
-    new THREE.TorusGeometry(
-      R,
-      .11,
-      18,
-      112
-    ),
-    rubberMat
-  );
-
-bracelet.add(
-  strap
-);
 
 
 /* =========================================================
@@ -1753,6 +1747,15 @@ let activeTime =
 
 /* =========================================================
    AUDIO — RESONANCIA + MÚSICA DE FONDO
+   =========================================================
+   Los dos audios son completamente independientes:
+   - backgroundMusic: intenta sonar sola desde que carga la
+     página (o desde la primera interacción, si el navegador
+     bloquea el autoplay). Su volumen se controla con
+     #volumeControl.
+   - resonanceSfx: SOLO se dispara desde el botón/​tecla
+     "Activar Resonancia". Su volumen se controla con
+     #resonanceVolumeControl, sin afectar a la música.
    ========================================================= */
 
 const backgroundMusic =
@@ -1776,13 +1779,37 @@ function startBackgroundMusic(){
     return;
   }
 
-  audioStarted = true;
-
-  backgroundMusic.play().catch(() => {
-    audioStarted = false;
-  });
+  backgroundMusic.play()
+    .then(() => {
+      audioStarted = true;
+    })
+    .catch(() => {
+      /* El navegador bloqueó el autoplay: se reintentará
+         en cuanto ocurra la primera interacción del usuario
+         (ver los listeners de pointerdown/keydown más abajo). */
+      audioStarted = false;
+    });
 
 }
+
+/* Intento inmediato al cargar la página. */
+startBackgroundMusic();
+
+/* Reintento en la primera interacción, por si el navegador
+   bloqueó el intento anterior. Esto es independiente del
+   botón de resonancia: cualquier clic o tecla en la página
+   lo dispara. */
+document.addEventListener(
+  "pointerdown",
+  startBackgroundMusic,
+  { once:true }
+);
+
+document.addEventListener(
+  "keydown",
+  startBackgroundMusic,
+  { once:true }
+);
 
 const volumeControl =
   document.getElementById("volumeControl");
@@ -1798,6 +1825,24 @@ volumeControl.addEventListener("input", () => {
   backgroundMusic.volume = volume;
 
   volumeValue.textContent =
+    Math.round(volume * 100) + "%";
+
+});
+
+const resonanceVolumeControl =
+  document.getElementById("resonanceVolumeControl");
+
+const resonanceVolumeValue =
+  document.getElementById("resonanceVolumeValue");
+
+resonanceVolumeControl.addEventListener("input", () => {
+
+  const volume =
+    Number(resonanceVolumeControl.value);
+
+  resonanceSfx.volume = volume;
+
+  resonanceVolumeValue.textContent =
     Math.round(volume * 100) + "%";
 
 });
@@ -1972,22 +2017,11 @@ renderer.domElement.addEventListener(
 );
 
 
-/* Inicia la música después de una interacción del usuario,
-   respetando las políticas de reproducción automática del navegador. */
-document.addEventListener(
-  "pointerdown",
-  startBackgroundMusic,
-  { once:true }
-);
-
-document.addEventListener(
-  "keydown",
-  startBackgroundMusic,
-  { once:true }
-);
-
 /* =========================================================
    ACTIVAR RESONANCIA
+   =========================================================
+   Este botón SOLO controla el sonido de resonancia.
+   No toca la música de fondo en absoluto.
    ========================================================= */
 
 function activate(){
@@ -2003,7 +2037,6 @@ function activate(){
   activeTime =
     0;
 
-  startBackgroundMusic();
   playResonanceSound();
 
 
