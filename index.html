@@ -517,6 +517,45 @@ canvas{
     display:none
   }
 }
+
+
+/* =========================================================
+   AUDIO — CONTROL DE VOLUMEN
+   ========================================================= */
+.audioControl{
+  position:fixed;
+  left:24px;
+  bottom:24px;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 12px;
+  border:1px solid rgba(110,220,255,.25);
+  background:rgba(5,12,20,.82);
+  backdrop-filter:blur(8px);
+  color:#bfefff;
+  font:11px/1.2 Arial,sans-serif;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.audioControl input[type=range]{
+  width:105px;
+  accent-color:#65ddff;
+  cursor:pointer;
+}
+.audioValue{
+  min-width:32px;
+  text-align:right;
+  color:#fff;
+}
+@media(max-width:700px){
+  .audioControl{
+    left:10px;
+    bottom:10px;
+  }
+}
+
 </style>
 </head>
 
@@ -662,6 +701,22 @@ canvas{
       ▶ &nbsp; Activar Resonancia
     </button>
 
+  </div>
+
+
+
+  <div class="audioControl" aria-label="Control de volumen">
+    <span>🔊 VOLUMEN</span>
+    <input
+      id="volumeControl"
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      value="0.40"
+      aria-label="Volumen"
+    >
+    <span id="volumeValue" class="audioValue">40%</span>
   </div>
 
   <div
@@ -1130,7 +1185,7 @@ const R = 1.48;
    hacemos la correa más delgada.
    ========================================================= */
 
-const strap =
+/*const strap =
   new THREE.Mesh(
     new THREE.TorusGeometry(
       R,
@@ -1691,14 +1746,56 @@ let activeTime =
   0;
 
 /* =========================================================
-   AUDIO — RESONANCIA
+   AUDIO — RESONANCIA + MÚSICA DE FONDO
    ========================================================= */
+
+const backgroundMusic =
+  new Audio("assets/reto4.mp3");
+
+backgroundMusic.preload = "auto";
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.40;
 
 const resonanceSfx =
   new Audio("assets/mixkit-interface-hint-notification-911.wav");
 
 resonanceSfx.preload = "auto";
 resonanceSfx.volume = 0.40;
+
+let audioStarted = false;
+
+function startBackgroundMusic(){
+
+  if(audioStarted){
+    return;
+  }
+
+  audioStarted = true;
+
+  backgroundMusic.play().catch(() => {
+    audioStarted = false;
+  });
+
+}
+
+const volumeControl =
+  document.getElementById("volumeControl");
+
+const volumeValue =
+  document.getElementById("volumeValue");
+
+volumeControl.addEventListener("input", () => {
+
+  const volume =
+    Number(volumeControl.value);
+
+  backgroundMusic.volume = volume;
+  resonanceSfx.volume = volume;
+
+  volumeValue.textContent =
+    Math.round(volume * 100) + "%";
+
+});
 
 let resonanceSoundTimers = [];
 
@@ -1716,7 +1813,7 @@ function playResonanceSound(){
 
   clearResonanceSoundTimers();
 
-  /* 3 pulsos: inicio + dos repeticiones durante el escaneo. */
+  /* 3 pulsos durante el escaneo. */
   const repetitions = 3;
   const interval = 1750;
 
@@ -1870,6 +1967,20 @@ renderer.domElement.addEventListener(
 );
 
 
+/* Inicia la música después de una interacción del usuario,
+   respetando las políticas de reproducción automática del navegador. */
+document.addEventListener(
+  "pointerdown",
+  startBackgroundMusic,
+  { once:true }
+);
+
+document.addEventListener(
+  "keydown",
+  startBackgroundMusic,
+  { once:true }
+);
+
 /* =========================================================
    ACTIVAR RESONANCIA
    ========================================================= */
@@ -1887,6 +1998,7 @@ function activate(){
   activeTime =
     0;
 
+  startBackgroundMusic();
   playResonanceSound();
 
 
