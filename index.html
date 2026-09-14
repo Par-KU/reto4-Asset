@@ -36,10 +36,46 @@ canvas{display:block}
 .bottom{position:absolute;left:22px;right:22px;bottom:18px;height:205px;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:12px}
 .panel{border:1px solid rgba(128,184,202,.25);background:rgba(4,12,17,.82);backdrop-filter:blur(7px);padding:12px}
 .panel h2{font-size:12px;font-weight:400;letter-spacing:.16em;margin:0 0 9px;color:#d5eaf1;text-transform:uppercase}
-.views{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.view{height:72px;border:1px solid rgba(100,180,205,.17);position:relative;overflow:hidden;background:linear-gradient(135deg,#0b1318,#05080c)}
-.view img{width:100%;height:100%;object-fit:cover;display:block}
-.viewLabel{position:absolute;left:7px;bottom:5px;font-size:9px;color:#a7c8d2;background:rgba(0,0,0,.45);padding:2px 4px}
+.views{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.view{
+    height:92px;
+    border:1px solid rgba(100,180,205,.20);
+    position:relative;
+    overflow:hidden;
+    background:#071017;
+    border-radius:2px;
+}
+
+.view img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+    transition:transform .35s ease, filter .35s ease;
+}
+
+.view:hover img{
+    transform:scale(1.04);
+    filter:brightness(1.08);
+}
+
+.viewLabel{
+    position:absolute;
+    left:7px;
+    bottom:6px;
+    font-size:10px;
+    color:#d8f5ff;
+    background:rgba(0,5,8,.78);
+    border-left:2px solid #45cbed;
+    padding:4px 7px;
+    letter-spacing:.03em;
+}
 .maps{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .map img{width:100%;height:76px;object-fit:cover;background:#0a1015;border:1px solid rgba(100,180,205,.17)}
 .map div{font-size:9px;text-align:center;color:#9fc2ce;margin-top:3px}
