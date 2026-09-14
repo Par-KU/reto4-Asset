@@ -335,7 +335,7 @@ activationRing.position.z=.31;
 activationRing.scale.set(.01,.01,.01);
 module.add(activationRing);
 
-let theta=.58, phi=1.25, distance=4.9;
+let theta=.58, phi=1.25, distance=6.2;
 let dragging=false,lastX=0,lastY=0;
 let active=false, activeTime=0;
 
@@ -359,7 +359,7 @@ window.addEventListener('pointermove',e=>{
   updateCamera();
 });
 renderer.domElement.addEventListener('wheel',e=>{
-  distance=Math.max(3.0,Math.min(7.5,distance+e.deltaY*.002));
+  distance=Math.max(3.0,Math.min(12,distance+e.deltaY*.002));
   updateCamera();
   e.preventDefault();
 },{passive:false});
